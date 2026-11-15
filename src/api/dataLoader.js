@@ -26,5 +26,5 @@ export function loadData() {
     ice: readGeo('ice.geojson'),
   };
   useStore.getState().setData(data);
-  initRouting(elevation, null); // hazards abhi routing ko nahi dete
+  initRouting(elevation, data.hazards); // hazards file na ho to null, routing handle karti hai
 }
