@@ -6,17 +6,15 @@ import Legend from "./components/Legend";
 import LayerToggles from "./components/LayerToggles";
 import PovPanel from "./components/PovPanel";
 
-// TEMPORARY fake path for the preview. Replace with route?.path from the store.
-const DEMO_PATH = [
-  { lat: 18.44, lon: 77.45, elevM: -2600 },
-  { lat: 18.43, lon: 77.49, elevM: -2580 },
-  { lat: 18.42, lon: 77.53, elevM: -2610 },
-  { lat: 18.40, lon: 77.60, elevM: -2590 },
-];
+import { useStore } from "./state/store";
+import povImages from "../data/pov_images.json";
 
 function App() {
-  const [layers, setLayers] = useState({ terrain: true, hazards: true, poi: true, ice: false });
-  const toggle = (key) => setLayers((l) => ({ ...l, [key]: !l[key] }));
+  const visibleLayers = useStore((s) => s.visibleLayers);
+  const toggleLayer = useStore((s) => s.toggleLayer);
+  const route = useStore((s) => s.route);
+  const routeError = useStore((s) => s.routeError);
+  const selectedPoi = useStore((s) => s.selectedPoi);
 
   return (
     <main className="app">
@@ -27,24 +25,19 @@ function App() {
         <em className="badge">Concept · not flight-certified</em>
       </header>
 
+      <LayerToggles
+        visibleLayers={visibleLayers}
+        onToggle={toggleLayer}
+      />
+
       <section className="workspace">
-        <aside className="col-left">
-          <div className="panel">
-            <h3>Layers</h3>
-            <LayerToggles visibleLayers={layers} onToggle={toggle} />
-          </div>
+        <MapView />
+
+        <aside>
+          <RoutePanel route={route} routeError={routeError} />
+          <ElevationChart path={route?.path} />
           <Legend />
-          <PovPanel poi={null} povImages={null} />
-        </aside>
-
-        <section className="map-panel">
-          <h2 className="panel-title">Topographic map</h2>
-          <MapView />
-        </section>
-
-        <aside className="col-right">
-          <RoutePanel demo />
-          <ElevationChart path={DEMO_PATH} simulated />
+          <PovPanel poi={selectedPoi} povImages={povImages} />
         </aside>
       </section>
     </main>
