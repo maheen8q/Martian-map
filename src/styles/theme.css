@@ -1,0 +1,420 @@
+/*
+  Mars Navigator theme (Maya). Mission-control look:
+  warm near-black panels, rust-orange accents, off-white text, thin borders.
+  Fonts: root assets/fonts/ (paths go up from src/styles/).
+  Import once in src/main.jsx, after index.css.
+*/
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../../assets/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/Inter-V.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../assets/fonts/JetBrainsMono[wght].ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #0c0d0f;
+  --panel: #141517;
+  --panel-2: #1a1b1e;
+  --line: #2a2523;
+  --line-strong: rgba(232, 116, 59, 0.5);
+
+  --accent: #e8743b;
+  --accent-soft: rgba(232, 116, 59, 0.14);
+  --amber: #f0a64a;
+
+  --text: #ece4db;
+  --text-2: #a39a91;
+  --text-3: #6f6760;
+
+  --safe: #6fbf7a;
+  --warn: #f0a64a;
+  --danger: #e0574f;
+  --oxygen: #5aaebf;
+
+  --r-panel: 16px;
+  --r-card: 12px;
+  --r-pill: 999px;
+
+  --font-head: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { min-width: 320px; background: var(--bg); }
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(232, 116, 59, 0.06), transparent 55%), var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-head); font-weight: 600; color: var(--text); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+img, svg { display: block; max-width: 100%; }
+
+/* ---------- App shell ---------- */
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(1680px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 20px;
+  padding: 14px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--panel);
+}
+
+.app > header h1 { font-size: 18px; letter-spacing: 0.16em; }
+
+.app > header p,
+.app > header span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.app > header span { margin-left: auto; color: var(--accent); }
+
+.badge {
+  padding: 3px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- Three-column workspace ---------- */
+.workspace {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 360px;
+  grid-template-areas: "left map right";
+  gap: 16px;
+  align-items: start;
+}
+
+.col-left { grid-area: left; }
+.col-right { grid-area: right; }
+.col-left, .col-right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.map-panel {
+  grid-area: map;
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--panel);
+}
+
+.map-panel .leaflet-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: #17181a;
+}
+
+.map-panel .panel-title {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: rgba(12, 13, 15, 0.82);
+}
+
+/* ---------- Panels ---------- */
+.panel,
+.route-panel,
+.elevation-chart,
+.legend,
+.pov-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--panel);
+}
+
+/* Panel headings: small caps, mono, hairline underneath */
+.panel-title,
+.route-panel h2,
+.elevation-chart h3,
+.legend h3,
+.pov-panel h3,
+.panel > h3 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.route-panel h2,
+.elevation-chart h3,
+.legend h3,
+.pov-panel h3,
+.panel > h3 {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stat-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.stat-value {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value small { font-size: 0.5em; font-weight: 400; color: var(--text-2); }
+
+.note,
+.disclaimer { font-size: 11px; color: var(--text-3); }
+.empty { color: var(--text-2); }
+
+/* ---------- Route overview ---------- */
+.route-panel { display: grid; grid-template-columns: 1fr 1fr; }
+.route-panel > * { grid-column: 1 / -1; }
+.route-panel > .risk,
+.route-panel > .oxygen { grid-column: auto; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat-card { display: flex; flex-direction: column; gap: 4px; }
+.stats-grid .stat-card:first-child { grid-column: 1 / -1; }
+.stats-grid .stat-card:first-child .stat-value { font-size: 40px; }
+
+.risk,
+.oxygen,
+.hazards,
+.legs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--panel-2);
+}
+
+.bar { width: 100%; height: 6px; overflow: hidden; border-radius: var(--r-pill); background: #2d2a28; }
+.bar-fill { height: 100%; border-radius: inherit; background: var(--text-3); }
+
+.risk-green .bar-fill { background: var(--safe); }
+.risk-amber .bar-fill { background: var(--warn); }
+.risk-red .bar-fill { background: var(--danger); }
+.risk-green .stat-value { color: var(--safe); }
+.risk-amber .stat-value { color: var(--warn); }
+.risk-red .stat-value { color: var(--danger); }
+
+.oxygen-ok .bar-fill { background: var(--oxygen); }
+.oxygen-over { border-color: var(--danger); }
+.oxygen-over .bar-fill { background: var(--danger); }
+.oxygen-over .stat-value { color: var(--danger); }
+
+.warning { font-size: 12px; font-weight: 600; color: var(--danger); }
+
+.route-panel .error {
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--r-card);
+  background: rgba(224, 87, 79, 0.12);
+}
+
+.hazards ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.hazards li {
+  padding: 2px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.legs { overflow-x: auto; }
+.legs table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.legs th, .legs td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.legs th { font-weight: 500; color: var(--text-2); }
+
+/* ---------- Elevation chart (SVG) ---------- */
+.elevation-chart .grid { stroke: var(--line); stroke-width: 1; }
+.elevation-chart .tick { fill: var(--text-3); font-family: var(--font-mono); font-size: 11px; }
+.elevation-chart .axis-label { fill: var(--text-2); font-size: 11px; }
+.elevation-chart .profile-line { stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.elevation-chart .hover-line { stroke: var(--text-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.elevation-chart .hover-dot { fill: var(--amber); stroke: var(--text); stroke-width: 1.5; }
+
+/* ---------- Layer toggles (vertical list) ---------- */
+.layer-toggles { display: flex; flex-direction: column; gap: 6px; }
+
+.layer-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--panel-2);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.layer-name { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px; }
+.layer-name::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
+.layer-type { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); text-align: right; }
+
+.layer-toggle.on { border-color: var(--line-strong); background: var(--accent-soft); }
+.layer-toggle.on .layer-name::before { background: var(--accent); }
+.layer-toggle.off .layer-name { color: var(--text-3); }
+
+/* ---------- Legend ---------- */
+.legend ul { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 6px; padding: 0; list-style: none; }
+.legend li { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-2); }
+
+.swatch { width: 14px; height: 14px; flex: 0 0 auto; border-radius: 3px; }
+.swatch-radar { background: var(--oxygen); opacity: 0.7; }
+
+.poi-icon { width: 12px; height: 12px; flex: 0 0 auto; background: var(--amber); }
+.poi-landing-site { border-radius: 50%; background: var(--safe); }
+.poi-region { border: 2px solid var(--amber); border-radius: 50%; background: transparent; }
+.poi-waypoint { background: var(--accent); transform: rotate(45deg); }
+
+/* ---------- POV panel ---------- */
+.pov-panel figure { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.pov-panel img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-card); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas: "map right" "left left";
+  }
+  .col-left { flex-direction: row; flex-wrap: wrap; }
+  .col-left > * { flex: 1 1 260px; }
+}
+
+@media (max-width: 760px) {
+  .app { padding: 10px; }
+  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "map" "right" "left"; }
+  .map-panel { min-height: 60vh; }
+  .app > header span { margin-left: 0; }
+  .stats-grid .stat-card:first-child .stat-value { font-size: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ===== Additions: slope-coloured chart, oxygen ring, map scale ===== */
+
+/* Elevation chart: area fill, slope-coloured segments, A/B markers */
+.elevation-chart .profile-area { fill: var(--accent); opacity: 0.1; }
+.elevation-chart .seg { stroke-width: 2.5; stroke-linecap: round; }
+.seg-low { stroke: var(--safe); }
+.seg-mid { stroke: var(--warn); }
+.seg-high { stroke: #e8743b; }
+.seg-severe { stroke: var(--danger); }
+.elevation-chart .end-dot { stroke: var(--text); stroke-width: 1.5; }
+.elevation-chart .end-a { fill: var(--safe); }
+.elevation-chart .end-b { fill: var(--danger); }
+.elevation-chart .end-label { fill: var(--text); font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+
+.slope-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
+.slope-legend li { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--text-2); }
+.slope-swatch { width: 16px; height: 3px; border-radius: 2px; background: currentColor; }
+.slope-swatch.seg-low { color: var(--safe); }
+.slope-swatch.seg-mid { color: var(--warn); }
+.slope-swatch.seg-high { color: #e8743b; }
+.slope-swatch.seg-severe { color: var(--danger); }
+
+/* Oxygen: ring gauge */
+.oxygen-body { display: flex; align-items: center; gap: 14px; }
+.ring { flex: 0 0 auto; }
+.ring-track { stroke: #2d2a28; stroke-width: 7; }
+.ring-fill { stroke: var(--oxygen); stroke-width: 7; stroke-linecap: round; }
+.oxygen-over .ring-fill { stroke: var(--danger); }
+.ring-text { fill: var(--text-2); font-family: var(--font-mono); font-size: 13px; }
+.oxygen-readout { display: flex; flex-direction: column; gap: 2px; }
+.oxygen-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
+.oxygen-over .oxygen-status { color: var(--danger); }
+
+/* Route panel: let oxygen take a full row now that it has a ring */
+.route-panel > .oxygen { grid-column: 1 / -1; }
+
+/* Map: scale bar styled like the reference maps */
+.leaflet-control-scale-line {
+  border: 2px solid var(--text);
+  border-top: none;
+  background: rgba(12, 13, 15, 0.8);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}

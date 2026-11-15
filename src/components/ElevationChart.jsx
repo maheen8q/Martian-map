@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 // Elevation (m) against distance along the route (km). Plain SVG, no library.
+// Line is coloured by slope between points; area fill below. Slope bands are
+// display classes only (not a safety rating).
 const MARS_RADIUS_KM = 3389.5;
 const toRad = (d) => (d * Math.PI) / 180;
 
@@ -27,10 +29,25 @@ function buildProfile(path) {
   });
 }
 
-const W = 600, H = 220;
-const PAD = { top: 12, right: 16, bottom: 34, left: 56 };
+// Slope between two profile points, in degrees.
+function slopeDeg(a, b) {
+  const runM = (b.distKm - a.distKm) * 1000;
+  if (!(runM > 0)) return 0;
+  return (Math.atan(Math.abs(b.elevM - a.elevM) / runM) * 180) / Math.PI;
+}
 
-// Props: path (route.path), onHoverPoint(point | null) so the map can highlight it.
+const BANDS = [
+  { key: 'low', max: 5, label: '< 5°' },
+  { key: 'mid', max: 10, label: '5–10°' },
+  { key: 'high', max: 15, label: '10–15°' },
+  { key: 'severe', max: Infinity, label: '> 15°' },
+];
+const bandOf = (deg) => BANDS.find((b) => deg < b.max).key;
+
+const W = 600, H = 220;
+const PAD = { top: 14, right: 16, bottom: 34, left: 56 };
+
+// Props: path (route.path), onHoverPoint(point | null), simulated (bool).
 export default function ElevationChart({ path, onHoverPoint, simulated }) {
   const [hover, setHover] = useState(null);
   const data = buildProfile(path);
@@ -52,7 +69,17 @@ export default function ElevationChart({ path, onHoverPoint, simulated }) {
 
   const x = (d) => PAD.left + (d / maxD) * (W - PAD.left - PAD.right);
   const y = (e) => PAD.top + (1 - (e - minE) / (maxE - minE)) * (H - PAD.top - PAD.bottom);
-  const line = data.map((d) => `${x(d.distKm).toFixed(1)},${y(d.elevM).toFixed(1)}`).join(' ');
+  const baseY = H - PAD.bottom;
+
+  const area =
+    `${x(0).toFixed(1)},${baseY} ` +
+    data.map((d) => `${x(d.distKm).toFixed(1)},${y(d.elevM).toFixed(1)}`).join(' ') +
+    ` ${x(maxD).toFixed(1)},${baseY}`;
+
+  const segments = data.slice(1).map((d, i) => {
+    const a = data[i];
+    return { a, b: d, band: bandOf(slopeDeg(a, d)) };
+  });
 
   const move = (ev) => {
     const box = ev.currentTarget.getBoundingClientRect();
@@ -72,6 +99,8 @@ export default function ElevationChart({ path, onHoverPoint, simulated }) {
 
   const h = hover === null ? null : data[hover];
   const yTicks = [minE, (minE + maxE) / 2, maxE];
+  const first = data[0];
+  const last = data[data.length - 1];
 
   return (
     <div className="elevation-chart">
@@ -80,7 +109,7 @@ export default function ElevationChart({ path, onHoverPoint, simulated }) {
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         role="img"
-        aria-label="Elevation in metres along the route in kilometres"
+        aria-label="Elevation in metres along the route in kilometres, coloured by slope"
         onMouseMove={move}
         onMouseLeave={leave}
       >
@@ -92,7 +121,19 @@ export default function ElevationChart({ path, onHoverPoint, simulated }) {
             </text>
           </g>
         ))}
-        <polyline className="profile-line" fill="none" points={line} />
+        <polygon className="profile-area" points={area} />
+        {segments.map((s, i) => (
+          <line
+            key={i}
+            className={`seg seg-${s.band}`}
+            x1={x(s.a.distKm)} y1={y(s.a.elevM)}
+            x2={x(s.b.distKm)} y2={y(s.b.elevM)}
+          />
+        ))}
+        <circle className="end-dot end-a" cx={x(first.distKm)} cy={y(first.elevM)} r="5" />
+        <circle className="end-dot end-b" cx={x(last.distKm)} cy={y(last.elevM)} r="5" />
+        <text className="end-label" x={x(first.distKm)} y={y(first.elevM) - 10} textAnchor="middle">A</text>
+        <text className="end-label" x={x(last.distKm)} y={y(last.elevM) - 10} textAnchor="middle">B</text>
         <text className="axis-label" x={W / 2} y={H - 6} textAnchor="middle">
           Distance along route (km)
         </text>
@@ -103,17 +144,27 @@ export default function ElevationChart({ path, onHoverPoint, simulated }) {
         <text className="tick" x={W - PAD.right} y={H - 18} textAnchor="end">{maxD.toFixed(1)}</text>
         {h && (
           <g>
-            <line className="hover-line" x1={x(h.distKm)} x2={x(h.distKm)} y1={PAD.top} y2={H - PAD.bottom} />
+            <line className="hover-line" x1={x(h.distKm)} x2={x(h.distKm)} y1={PAD.top} y2={baseY} />
             <circle className="hover-dot" cx={x(h.distKm)} cy={y(h.elevM)} r="4" />
           </g>
         )}
       </svg>
+
+      <ul className="slope-legend" aria-label="Slope colour key">
+        {BANDS.map((b) => (
+          <li key={b.key}>
+            <span className={`slope-swatch seg-${b.key}`} aria-hidden="true" />
+            {b.label}
+          </li>
+        ))}
+      </ul>
+
       <p className="note">
         {h
           ? `${h.distKm.toFixed(2)} km · ${Math.round(h.elevM)} m`
-          : 'Hover the chart to inspect a point.'}
+          : 'Hover the chart to inspect a point. Colours show slope between points (display bands, not a safety rating).'}
       </p>
-        {simulated && <p className="note">Simulated terrain</p>}
+      {simulated && <p className="note">Simulated terrain</p>}
     </div>
   );
 }
