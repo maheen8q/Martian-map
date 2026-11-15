@@ -1,3 +1,4 @@
+import { useState } from "react";
 import MapView from "./map/MapView";
 import RoutePanel from "./components/RoutePanel";
 import ElevationChart from "./components/ElevationChart";
@@ -19,8 +20,9 @@ function App() {
     <main className="app">
       <header>
         <h1>MARS NAVIGATOR</h1>
-        <p>PLANETARY EXPLORATION SYSTEM</p>
+        <p>Planetary exploration system</p>
         <span>JEZERO CRATER · MARS</span>
+        <em className="badge">Concept · not flight-certified</em>
       </header>
 
       <LayerToggles
