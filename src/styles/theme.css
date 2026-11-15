@@ -672,3 +672,132 @@ img, svg { display: block; max-width: 100%; }
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ===== One-page fit: whole dashboard inside the browser window, no page scroll =====
+   Paste at the VERY END of src/styles/theme.css.
+   Applies only on screens at least 1181px wide and 680px tall.
+   Smaller screens keep the normal scrolling layout. */
+@media (min-width: 1181px) and (min-height: 680px) {
+  html, body, #root { height: 100%; overflow: hidden; }
+  body { min-height: 0; }
+
+  .app {
+    height: 100vh;
+    min-height: 0;
+    gap: 8px;
+    padding: 8px 12px 10px;
+  }
+  .topbar { min-height: 44px; }
+
+  .workspace {
+    min-height: 0;
+    gap: 8px;
+    grid-template-columns: clamp(230px, 17vw, 280px) minmax(0, 1fr) clamp(290px, 22vw, 350px);
+  }
+
+  /* Side columns: tighter, and scroll inside themselves if a short window needs it */
+  .col-left,
+  .col-right {
+    gap: 8px;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Map takes whatever height is left */
+  .map-stage { min-height: 0; }
+
+  .panel,
+  .route-panel,
+  .elevation-chart,
+  .legend,
+  .pov-panel {
+    gap: 8px;
+    padding: 10px 12px 12px;
+  }
+  .panel-head { padding-bottom: 6px; font-size: 12px; }
+  .stat-hero { font-size: clamp(26px, 4.2vh, 36px); }
+  .elevation-chart svg { max-height: 24vh; }
+
+  /* Bottom bar: slim, never taller than needed */
+  .mission-bar {
+    flex: 0 0 auto;
+    min-height: 0;
+    gap: 6px 20px;
+    padding: 8px 14px;
+  }
+  .mission-stats { gap: 6px 28px; }
+  .mission-stats strong { margin-top: 2px; font-size: 15px; }
+}
+
+/* ===== Glass dashboard: map full-bleed, panels float over it as frosted glass =====
+   Paste at the VERY END of src/styles/theme.css (after the one-page block).
+   Desktop only (>= 1181px wide, >= 680px tall). Smaller screens keep the normal layout. */
+@media (min-width: 1181px) and (min-height: 680px) {
+  .workspace {
+    --left-w: clamp(230px, 17vw, 280px);
+    --right-w: clamp(290px, 22vw, 350px);
+    position: relative;
+  }
+
+  /* Map fills the whole work area, behind everything */
+  .map-panel {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: var(--r-panel);
+  }
+  .map-head { padding-left: calc(var(--left-w) + 28px); }
+  .map-panel .leaflet-top.leaflet-left { left: calc(var(--left-w) + 16px); }
+  .map-compass { left: calc(var(--left-w) + 28px); }
+
+  /* Side columns sit above the map; empty space between panels stays clickable on the map */
+  .col-left, .col-right {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    padding: 10px;
+  }
+  .col-left > *, .col-right > * { pointer-events: auto; }
+
+  /* The glass */
+  .panel,
+  .route-panel,
+  .elevation-chart,
+  .legend,
+  .pov-panel {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02) 55%),
+      rgba(14, 16, 17, 0.38);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top-color: rgba(255, 255, 255, 0.28);
+    box-shadow:
+      0 10px 34px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  .mission-bar {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 55%),
+      rgba(14, 16, 17, 0.55);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  /* Route line: glow + slow flowing dashes */
+  .leaflet-overlay-pane path[stroke="#ce733b"] {
+    filter: drop-shadow(0 0 6px rgba(206, 115, 59, 0.9));
+    stroke-dasharray: 10 8;
+    animation: route-flow 1.2s linear infinite;
+  }
+}
+
+@keyframes route-flow { to { stroke-dashoffset: -18; } }
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-overlay-pane path[stroke="#ce733b"] { animation: none; }
+}
+
