@@ -801,3 +801,23 @@ img, svg { display: block; max-width: 100%; }
   .leaflet-overlay-pane path[stroke="#ce733b"] { animation: none; }
 }
 
+/* ===== Fixes: map label offsets and centered top-bar crumb ===== */
+@media (min-width: 1181px) and (min-height: 680px) {
+  .map-head { padding-left: 16px; }
+  .map-panel .leaflet-top.leaflet-left { left: 0; }
+  .map-compass { left: 12px; }
+
+  .topbar { position: relative; }
+  .crumb {
+    position: absolute;
+    left: 50%;
+    flex: none;
+    transform: translateX(-50%);
+    color: var(--text-2);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 1180px) {
+  .crumb { display: none; }
+}
