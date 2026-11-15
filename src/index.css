@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #101114;
+  color: #ffffff;
+}.leaflet-container {
+  background: #17191d;
+  border-radius: 12px;
+}
