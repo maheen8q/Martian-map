@@ -1,34 +1,44 @@
-// Risk score bar. 0-33 green, 34-66 amber, 67-100 red. Used by RoutePanel.
 function riskLevel(score) {
   if (!Number.isFinite(score)) return null;
-  if (score <= 33) return { key: 'green', label: 'Low' };
-  if (score <= 66) return { key: 'amber', label: 'Moderate' };
-  return { key: 'red', label: 'High' };
+  if (score <= 33) return { key: "green", label: "Low" };
+  if (score <= 66) return { key: "amber", label: "Medium" };
+  return { key: "red", label: "High" };
 }
 
 export default function RiskIndicator({ score }) {
   const level = riskLevel(score);
-  if (!level) {
-    return (
-      <div className="risk">
-        <span className="stat-label">Risk score</span>
-        <span className="stat-value">—</span>
-      </div>
-    );
-  }
+  const pct = level ? Math.max(0, Math.min(100, score)) : 0;
 
-  const pct = Math.max(0, Math.min(100, score));
   return (
-    <div className={`risk risk-${level.key}`}>
-      <span className="stat-label">Risk score</span>
-      <span className="stat-value">
-        {Math.round(score)}
-        <small> / 100 · {level.label}</small>
-      </span>
-      <div className="bar" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+    <div className={level ? `risk risk-${level.key}` : "risk"}>
+      <div className="metric-head">
+        <span className="stat-label">Risk level</span>
+        <span className="stat-value">
+          {level ? (
+            <>
+              <i className="status-dot" aria-hidden="true" />
+              {level.label}
+            </>
+          ) : (
+            "—"
+          )}
+        </span>
+      </div>
+      <div
+        className="bar"
+        role="meter"
+        aria-label="Risk score"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={level ? Math.round(score) : undefined}
+      >
         <div className="bar-fill" style={{ width: `${pct}%` }} />
       </div>
-      <span className="note">Heuristic estimate, not a safety rating.</span>
+      <span className="note">
+        {level
+          ? `${Math.round(score)} / 100 · heuristic, not a safety rating`
+          : "No route yet"}
+      </span>
     </div>
   );
 }

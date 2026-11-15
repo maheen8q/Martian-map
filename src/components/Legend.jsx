@@ -1,22 +1,25 @@
-// Legend for hazard colours and point-of-interest icons.
-// Colours/icons here must match the map layers (Ayesha). Names match routing: dune, rough, steep, rock.
+import { IconLayers } from "./icons.jsx";
+
 const HAZARDS = [
-  { key: 'dune', label: 'Dune', color: '#d9a441' },
-  { key: 'rough', label: 'Rough ground', color: '#c97b3a' },
-  { key: 'steep', label: 'Steep slope (blocked)', color: '#d64533' },
-  { key: 'rock', label: 'Rock field (blocked)', color: '#8c3b2e' },
+  { key: "dune", label: "Dune", color: "#d9a441" },
+  { key: "rough", label: "Rough ground", color: "#c97b3a" },
+  { key: "steep", label: "Steep slope (blocked)", color: "#d64533" },
+  { key: "rock", label: "Rock field (blocked)", color: "#8c3b2e" },
 ];
 
 const POI_TYPES = [
-  { key: 'landing-site', label: 'Landing site' },
-  { key: 'region', label: 'Region' },
-  { key: 'waypoint', label: 'Science stop / waypoint' },
+  { key: "landing-site", label: "Landing site" },
+  { key: "region", label: "Region" },
+  { key: "waypoint", label: "Science stop" },
 ];
 
 export default function Legend() {
   return (
-    <div className="legend">
-      <h3>Legend</h3>
+    <section className="legend">
+      <h3 className="panel-head">
+        <IconLayers />
+        Legend
+      </h3>
 
       <span className="stat-label">Hazards</span>
       <ul>
@@ -37,7 +40,7 @@ export default function Legend() {
           </li>
         ))}
       </ul>
-        
+
       <span className="stat-label">Radar</span>
       <ul>
         <li>
@@ -45,7 +48,7 @@ export default function Legend() {
           SHARAD radar coverage
         </li>
       </ul>
-      <p className="note">Radar coverage, not an ice detection.</p>
-    </div>
+      <p className="note">Radar coverage, not an ice detection. There is no ice-depth value in the route.</p>
+    </section>
   );
 }

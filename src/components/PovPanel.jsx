@@ -1,46 +1,57 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { IconPoi } from "./icons.jsx";
 
-// Shows why the selected stop matters, plus its point-of-view photo if we have one.
-// Props:
-//   poi         selectedPoi from the store (GeoJSON feature) or null
-//   povImages   contents of data/pov_images.json: { "Stop name": { imageUrl, credit, note } }
 export default function PovPanel({ poi, povImages }) {
   const [failed, setFailed] = useState(null);
   const props = poi && poi.properties ? poi.properties : null;
 
   if (!props) {
     return (
-      <aside className="pov-panel">
-        <h3>Stop details</h3>
-        <p className="empty">Click a point of interest to see why it matters.</p>
-      </aside>
+      <section className="pov-panel">
+        <h3 className="panel-head">
+          <IconPoi />
+          Point of view
+        </h3>
+        <p className="empty">Select a point of interest on the map.</p>
+      </section>
     );
   }
 
-  const pov = povImages && povImages[props.name] ? povImages[props.name] : null;
-  const showImage = pov && pov.imageUrl && failed !== pov.imageUrl;
+  const pov = povImages && props.name && povImages[props.name] ? povImages[props.name] : null;
+  const showImage = Boolean(pov && pov.imageUrl && failed !== pov.imageUrl);
 
   return (
-    <aside className="pov-panel">
-      <h3>{props.name}</h3>
+    <section className="pov-panel">
+      <h3 className="panel-head">
+        <IconPoi />
+        Point of view
+      </h3>
       {props.type && <span className="stat-label">{props.type}</span>}
-      {props.why && <p>{props.why}</p>}
+      {(props.description || props.why) && <p>{props.description || props.why}</p>}
+      {props.scienceReason && (
+        <p><span className="stat-label">Science</span> {props.scienceReason}</p>
+      )}
+      {props.survivalNote && (
+        <p><span className="stat-label">Terrain note</span> {props.survivalNote}</p>
+      )}
 
       {showImage ? (
         <figure>
-          <img
-            src={pov.imageUrl}
-            alt={pov.note || `View at ${props.name}`}
-            onError={() => setFailed(pov.imageUrl)}
-          />
-          <figcaption className="note">
-            {pov.note && <span>{pov.note} · </span>}
-            {pov.credit || 'Credit not provided'}
-          </figcaption>
+          <div className="pov-frame">
+            <img
+              src={pov.imageUrl}
+              alt={pov.note || `View at ${props.name}`}
+              onError={() => setFailed(pov.imageUrl)}
+            />
+            <figcaption className="pov-caption">{props.name}</figcaption>
+          </div>
+          {(pov.note || pov.credit) && (
+            <p className="note">{[pov.note, pov.credit].filter(Boolean).join(" · ")}</p>
+          )}
         </figure>
       ) : (
-        <p className="note">No point-of-view photo available for this stop.</p>
+        <p className="note">{pov && pov.note ? pov.note : "No point-of-view photo for this stop."}</p>
       )}
-    </aside>
+    </section>
   );
 }
