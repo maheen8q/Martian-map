@@ -1,10 +1,11 @@
-import { IconHazard, IconPoi, IconRadar, IconTerrain } from "./icons.jsx";
+import { IconHazard, IconLayers, IconPoi, IconRadar, IconTerrain } from "./icons.jsx";
 
 const ICONS = {
   terrain: <IconTerrain />,
   hazards: <IconHazard />,
   poi: <IconPoi />,
   ice: <IconRadar />,
+  hirise: <IconLayers />,
 };
 
 const DEFAULT_LAYERS = [
@@ -12,6 +13,7 @@ const DEFAULT_LAYERS = [
   { key: "hazards", label: "Slope hazards", dataType: "Derived from elevation" },
   { key: "poi", label: "Points of interest", dataType: "Mission sites" },
   { key: "ice", label: "SHARAD radar coverage", dataType: "Radar coverage, not an ice detection" },
+  { key: "hirise", label: "HiRISE imagery (partial coverage)", dataType: "Optical imagery, partial coverage" },
 ];
 
 export default function LayerToggles({ visibleLayers = {}, onToggle, layers = DEFAULT_LAYERS }) {
